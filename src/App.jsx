@@ -30,6 +30,18 @@ export default function App() {
   const addtask = async (e) => {
     e.preventDefault();
 
+    // ✅ VALIDATION FIX (IMPORTANT)
+    if (!name.trim()) {
+      alert("Name is required");
+      return;
+    }
+
+    if (!editid && !file) {
+      alert("File select kar bhai 📁");
+      return;
+    }
+
+    // UPDATE
     if (editid) {
       await fetch(`${BASE_URL}/api/v2/updatefile/${editid}`, {
         method: "PUT",
@@ -43,8 +55,10 @@ export default function App() {
       return;
     }
 
+    // CREATE
     const formdata = new FormData();
     formdata.append("name", name);
+
     if (file) formdata.append("file", file);
     if (parentid) formdata.append("parentid", parentid);
 
@@ -91,7 +105,7 @@ export default function App() {
     item.name.toLowerCase().includes(search.toLowerCase()),
   );
 
-  // DRAG & DROP
+  // DRAG DROP
   const handleDrop = (e) => {
     e.preventDefault();
     setfile(e.dataTransfer.files[0]);
@@ -225,11 +239,11 @@ export default function App() {
         ))}
       </main>
 
-      {/* BACK BUTTON (mobile + desktop perfect) */}
+      {/* BACK BUTTON */}
       {parentid && (
         <button
           onClick={goBack}
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 md:top-24 md:bottom-auto bg-red-500 px-5 py-2 rounded-full shadow-lg"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-red-500 px-5 py-2 rounded-full shadow-lg"
         >
           ← Back
         </button>
