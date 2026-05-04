@@ -12,6 +12,7 @@ export default function App() {
 
   const BASE_URL = "https://drive-backend-fwgl.onrender.com";
 
+  // GET DATA
   const getdata = async () => {
     let url = `${BASE_URL}/api/v2/getfile`;
     if (parentid) url = `${BASE_URL}/api/v2/getfile/${parentid}`;
@@ -25,6 +26,7 @@ export default function App() {
     getdata();
   }, [parentid]);
 
+  // CREATE / UPDATE
   const addtask = async (e) => {
     e.preventDefault();
 
@@ -56,6 +58,7 @@ export default function App() {
     getdata();
   };
 
+  // DELETE
   const deletes = async (id) => {
     await fetch(`${BASE_URL}/api/v2/deletefile/${id}`, {
       method: "DELETE",
@@ -63,6 +66,7 @@ export default function App() {
     getdata();
   };
 
+  // OPEN FOLDER
   const openFolder = (item) => {
     if (item.type === "folder") {
       setparentid(item._id);
@@ -70,6 +74,7 @@ export default function App() {
     }
   };
 
+  // BACK
   const goBack = () => {
     const newPath = [...path];
     newPath.pop();
@@ -79,14 +84,25 @@ export default function App() {
     setparentid(last ? last._id : null);
   };
 
+  // IMAGE CHECK
   const isImage = (file) => /\.(jpg|jpeg|png|gif|webp)$/i.test(file);
 
   const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase()),
   );
 
+  // DRAG & DROP
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setfile(e.dataTransfer.files[0]);
+  };
+
   return (
-    <div className="min-h-screen bg-[#0b0a10] text-white flex flex-col">
+    <div
+      onDrop={handleDrop}
+      onDragOver={(e) => e.preventDefault()}
+      className="min-h-screen bg-[#0b0a10] text-white flex flex-col"
+    >
       {/* BACKGROUND */}
       <div className="fixed inset-0 -z-10">
         <img
@@ -96,14 +112,14 @@ export default function App() {
         <div className="absolute inset-0 bg-black/70" />
       </div>
 
-      {/* HEADER (fixed safe height) */}
+      {/* HEADER */}
       <header className="fixed top-0 w-full z-50 bg-black/60 backdrop-blur-xl px-3 py-2 space-y-2">
         <h1 className="text-purple-400 font-bold text-lg">Shiyan Drive</h1>
 
         <input
           value={search}
           onChange={(e) => setsearch(e.target.value)}
-          placeholder="Search files..."
+          placeholder="Search files or folders..."
           className="w-full bg-white/10 px-3 py-2 rounded-lg outline-none"
         />
 
@@ -111,8 +127,8 @@ export default function App() {
           <input
             value={name}
             onChange={(e) => setname(e.target.value)}
-            placeholder="File name..."
-            className="flex-1 bg-white/10 px-3 py-2 rounded-lg"
+            placeholder="File / Folder name..."
+            className="flex-1 min-w-[120px] bg-white/10 px-3 py-2 rounded-lg"
           />
 
           <input
@@ -135,8 +151,8 @@ export default function App() {
         </form>
       </header>
 
-      {/* BREADCRUMB (proper spacing fix) */}
-      <div className="pt-[190px] md:pt-[170px] px-3 text-xs flex gap-2 overflow-x-auto whitespace-nowrap">
+      {/* BREADCRUMB */}
+      <div className="pt-[180px] px-3 flex gap-2 text-xs overflow-x-auto whitespace-nowrap">
         <span
           onClick={() => {
             setparentid(null);
@@ -161,7 +177,7 @@ export default function App() {
         ))}
       </div>
 
-      {/* GRID (clean mobile spacing) */}
+      {/* GRID */}
       <main className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-28">
         {filteredData.map((item) => (
           <div
@@ -171,7 +187,7 @@ export default function App() {
             <div
               onClick={() => openFolder(item)}
               onDoubleClick={() => item.file && setpreview(item.file)}
-              className="h-24 sm:h-32 bg-black/30 flex items-center justify-center rounded-lg overflow-hidden"
+              className="h-24 sm:h-32 bg-black/30 flex items-center justify-center rounded-lg overflow-hidden cursor-pointer"
             >
               {item.type === "folder" ? (
                 <img
@@ -209,11 +225,11 @@ export default function App() {
         ))}
       </main>
 
-      {/* BACK BUTTON (FIXED POSITION PROPER) */}
+      {/* BACK BUTTON (mobile + desktop perfect) */}
       {parentid && (
         <button
           onClick={goBack}
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-red-500 px-5 py-2 rounded-full shadow-lg md:top-24 md:bottom-auto"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 md:top-24 md:bottom-auto bg-red-500 px-5 py-2 rounded-full shadow-lg"
         >
           ← Back
         </button>
@@ -229,9 +245,10 @@ export default function App() {
         </div>
       )}
 
-      {/* FOOTER (fixed clean position, not too low) */}
+      {/* FOOTER */}
       <footer className="mt-auto py-4 text-center text-xs text-gray-400 border-t border-white/10">
-        Made with ❤️ by <span className="text-purple-400">Shiyan</span>
+        Made with ❤️ by{" "}
+        <span className="text-purple-400 font-semibold">Shiyan</span>
       </footer>
     </div>
   );
