@@ -13,7 +13,6 @@ export default function App() {
 
   const BASE_URL = "https://drive-backend-fwgl.onrender.com";
 
-  // GET DATA
   const getdata = async () => {
     let url = `${BASE_URL}/api/v2/getfile`;
     if (parentid) url = `${BASE_URL}/api/v2/getfile/${parentid}`;
@@ -27,7 +26,6 @@ export default function App() {
     getdata();
   }, [parentid]);
 
-  // CREATE / UPDATE
   const addtask = async (e) => {
     e.preventDefault();
 
@@ -66,7 +64,6 @@ export default function App() {
     getdata();
   };
 
-  // DELETE
   const deletes = async (id) => {
     await fetch(`${BASE_URL}/api/v2/deletefile/${id}`, {
       method: "DELETE",
@@ -74,7 +71,6 @@ export default function App() {
     getdata();
   };
 
-  // OPEN FOLDER
   const openFolder = (item) => {
     if (item.type === "folder") {
       setparentid(item._id);
@@ -82,7 +78,6 @@ export default function App() {
     }
   };
 
-  // BACK
   const goBack = () => {
     const newPath = [...path];
     newPath.pop();
@@ -118,7 +113,7 @@ export default function App() {
         <input
           value={search}
           onChange={(e) => setsearch(e.target.value)}
-          placeholder="Search files or folders..."
+          placeholder="Search files..."
           className="w-full bg-white/10 px-3 py-2 rounded-lg outline-none cursor-text"
         />
 
@@ -131,7 +126,7 @@ export default function App() {
                 if (e.target.value.trim()) seterror("");
               }}
               placeholder="File / Folder name..."
-              className={`w-full px-3 py-2 rounded-lg bg-white/10 outline-none cursor-text border ${
+              className={`w-full px-3 py-2 rounded-lg bg-white/10 outline-none border ${
                 error ? "border-red-500" : "border-transparent"
               }`}
             />
@@ -146,10 +141,7 @@ export default function App() {
             className="hidden"
           />
 
-          <label
-            htmlFor="file"
-            className="bg-white/10 px-3 py-2 rounded-lg cursor-pointer hover:bg-white/20 transition"
-          >
+          <label className="bg-white/10 px-3 py-2 rounded-lg cursor-pointer hover:bg-white/20">
             📁
           </label>
 
@@ -159,8 +151,8 @@ export default function App() {
         </form>
       </header>
 
-      {/* BREADCRUMB */}
-      <div className="pt-[180px] px-3 flex gap-2 text-xs overflow-x-auto whitespace-nowrap">
+      {/* BREADCRUMB (FIXED + CLEAN DRIVE STYLE) */}
+      <div className="pt-[175px] px-3 text-xs flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
         <span
           onClick={() => {
             setparentid(null);
@@ -168,7 +160,7 @@ export default function App() {
           }}
           className="cursor-pointer text-white hover:text-purple-400"
         >
-          Home /
+          /home /
         </span>
 
         {path.map((p, i) => (
@@ -190,8 +182,9 @@ export default function App() {
         {filteredData.map((item) => (
           <div
             key={item._id}
-            className="bg-white/5 border border-white/10 rounded-xl p-2 hover:scale-105 transition cursor-pointer"
+            className="bg-white/5 border border-white/10 rounded-xl p-2 hover:scale-[1.03] transition cursor-pointer"
           >
+            {/* FILE BOX */}
             <div
               onClick={() => openFolder(item)}
               onDoubleClick={() => item.file && setpreview(item.file)}
@@ -200,25 +193,22 @@ export default function App() {
               {item.type === "folder" ? (
                 <img
                   src="https://cdn-icons-png.flaticon.com/512/3767/3767084.png"
-                  className="w-14 sm:w-16 cursor-pointer"
+                  className="w-14 sm:w-16"
                 />
               ) : item.file && isImage(item.file) ? (
-                <img
-                  src={item.file}
-                  className="w-full h-full object-cover cursor-pointer"
-                />
+                <img src={item.file} className="w-full h-full object-cover" />
               ) : (
-                <span className="cursor-pointer">📄</span>
+                <span>📄</span>
               )}
             </div>
 
-            <p className="text-xs mt-2 truncate cursor-pointer">{item.name}</p>
+            <p className="text-xs mt-2 truncate">{item.name}</p>
 
-            {/* ACTIONS */}
-            <div className="flex justify-between text-[10px] mt-2">
+            {/* ACTION BUTTONS (CLEAN UI) */}
+            <div className="flex justify-between mt-2 text-[11px]">
               <button
                 onClick={() => deletes(item._id)}
-                className="text-red-400 cursor-pointer hover:scale-110"
+                className="px-2 py-1 bg-red-500/20 text-red-400 rounded-md hover:bg-red-500/30"
               >
                 Delete
               </button>
@@ -228,7 +218,7 @@ export default function App() {
                   setname(item.name);
                   seteditid(item._id);
                 }}
-                className="text-yellow-400 cursor-pointer hover:scale-110"
+                className="px-2 py-1 bg-yellow-500/20 text-yellow-300 rounded-md hover:bg-yellow-500/30"
               >
                 Edit
               </button>
@@ -241,7 +231,7 @@ export default function App() {
       {parentid && (
         <button
           onClick={goBack}
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-red-500 px-5 py-2 rounded-full shadow-lg cursor-pointer hover:scale-110 transition"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-red-500 px-5 py-2 rounded-full shadow-lg hover:scale-105 transition cursor-pointer"
         >
           ← Back
         </button>
@@ -251,14 +241,14 @@ export default function App() {
       {preview && (
         <div
           onClick={() => setpreview(null)}
-          className="fixed inset-0 bg-black/80 flex items-center justify-center cursor-pointer"
+          className="fixed inset-0 bg-black/80 flex items-center justify-center"
         >
           <img src={preview} className="max-w-[90%] max-h-[80%] rounded-xl" />
         </div>
       )}
 
       {/* FOOTER */}
-      <footer className="mt-auto py-4 text-center text-xs text-gray-400 border-t border-white/10">
+      <footer className="mt-auto py-3 text-center text-xs text-gray-400 border-t border-white/10">
         Made with ❤️ by{" "}
         <span className="text-purple-400 font-semibold cursor-pointer">
           Shiyan
