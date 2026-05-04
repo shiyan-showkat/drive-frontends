@@ -13,6 +13,7 @@ export default function App() {
 
   const BASE_URL = "https://drive-backend-fwgl.onrender.com";
 
+  // GET DATA
   const getdata = async () => {
     let url = `${BASE_URL}/api/v2/getfile`;
     if (parentid) url = `${BASE_URL}/api/v2/getfile/${parentid}`;
@@ -26,11 +27,12 @@ export default function App() {
     getdata();
   }, [parentid]);
 
+  // CREATE / UPDATE
   const addtask = async (e) => {
     e.preventDefault();
 
     if (!name.trim()) {
-      seterror("Name is required");
+      seterror("Name required");
       return;
     }
 
@@ -64,6 +66,7 @@ export default function App() {
     getdata();
   };
 
+  // DELETE
   const deletes = async (id) => {
     await fetch(`${BASE_URL}/api/v2/deletefile/${id}`, {
       method: "DELETE",
@@ -71,6 +74,7 @@ export default function App() {
     getdata();
   };
 
+  // OPEN FOLDER
   const openFolder = (item) => {
     if (item.type === "folder") {
       setparentid(item._id);
@@ -78,11 +82,11 @@ export default function App() {
     }
   };
 
+  // BACK
   const goBack = () => {
     const newPath = [...path];
     newPath.pop();
     const last = newPath[newPath.length - 1];
-
     setpath(newPath);
     setparentid(last ? last._id : null);
   };
@@ -114,25 +118,21 @@ export default function App() {
           value={search}
           onChange={(e) => setsearch(e.target.value)}
           placeholder="Search files..."
-          className="w-full bg-white/10 px-3 py-2 rounded-lg outline-none cursor-text"
+          className="w-full bg-white/10 px-3 py-2 rounded-lg outline-none"
         />
 
         <form onSubmit={addtask} className="flex gap-2 flex-wrap">
-          <div className="w-full">
-            <input
-              value={name}
-              onChange={(e) => {
-                setname(e.target.value);
-                if (e.target.value.trim()) seterror("");
-              }}
-              placeholder="File / Folder name..."
-              className={`w-full px-3 py-2 rounded-lg bg-white/10 outline-none border ${
-                error ? "border-red-500" : "border-transparent"
-              }`}
-            />
-
-            {error && <p className="text-red-400 text-xs mt-1 ml-1">{error}</p>}
-          </div>
+          <input
+            value={name}
+            onChange={(e) => {
+              setname(e.target.value);
+              if (e.target.value.trim()) seterror("");
+            }}
+            placeholder="File / Folder name..."
+            className={`flex-1 px-3 py-2 rounded-lg bg-white/10 outline-none border ${
+              error ? "border-red-500" : "border-transparent"
+            }`}
+          />
 
           <input
             type="file"
@@ -145,22 +145,22 @@ export default function App() {
             📁
           </label>
 
-          <button className="bg-purple-600 px-4 py-2 rounded-lg cursor-pointer hover:scale-105 transition">
+          <button className="bg-purple-600 px-4 py-2 rounded-lg hover:scale-105 transition">
             {editid ? "Update" : "Upload"}
           </button>
         </form>
       </header>
 
-      {/* BREADCRUMB (FIXED + CLEAN DRIVE STYLE) */}
-      <div className="pt-[175px] px-3 text-xs flex gap-2 overflow-x-auto whitespace-nowrap scrollbar-hide">
+      {/* BREADCRUMB */}
+      <div className="pt-[170px] px-3 flex gap-2 text-xs overflow-x-auto whitespace-nowrap">
         <span
           onClick={() => {
             setparentid(null);
             setpath([]);
           }}
-          className="cursor-pointer text-white hover:text-purple-400"
+          className="cursor-pointer hover:text-purple-400"
         >
-          /home /
+          Home /
         </span>
 
         {path.map((p, i) => (
@@ -178,17 +178,16 @@ export default function App() {
       </div>
 
       {/* GRID */}
-      <main className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-28">
+      <main className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-32">
         {filteredData.map((item) => (
           <div
             key={item._id}
-            className="bg-white/5 border border-white/10 rounded-xl p-2 hover:scale-[1.03] transition cursor-pointer"
+            className="bg-white/5 border border-white/10 rounded-xl p-2 hover:scale-105 transition cursor-pointer"
           >
-            {/* FILE BOX */}
             <div
               onClick={() => openFolder(item)}
               onDoubleClick={() => item.file && setpreview(item.file)}
-              className="h-24 sm:h-32 bg-black/30 flex items-center justify-center rounded-lg overflow-hidden"
+              className="h-24 sm:h-32 bg-black/30 rounded-lg flex items-center justify-center overflow-hidden"
             >
               {item.type === "folder" ? (
                 <img
@@ -204,11 +203,10 @@ export default function App() {
 
             <p className="text-xs mt-2 truncate">{item.name}</p>
 
-            {/* ACTION BUTTONS (CLEAN UI) */}
-            <div className="flex justify-between mt-2 text-[11px]">
+            <div className="flex justify-between text-[11px] mt-2">
               <button
                 onClick={() => deletes(item._id)}
-                className="px-2 py-1 bg-red-500/20 text-red-400 rounded-md hover:bg-red-500/30"
+                className="text-red-400 hover:scale-110"
               >
                 Delete
               </button>
@@ -218,7 +216,7 @@ export default function App() {
                   setname(item.name);
                   seteditid(item._id);
                 }}
-                className="px-2 py-1 bg-yellow-500/20 text-yellow-300 rounded-md hover:bg-yellow-500/30"
+                className="text-yellow-400 hover:scale-110"
               >
                 Edit
               </button>
@@ -227,11 +225,11 @@ export default function App() {
         ))}
       </main>
 
-      {/* BACK BUTTON */}
+      {/* BACK BUTTON (PROPER FIXED) */}
       {parentid && (
         <button
           onClick={goBack}
-          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-red-500 px-5 py-2 rounded-full shadow-lg hover:scale-105 transition cursor-pointer"
+          className="fixed bottom-24 left-1/2 -translate-x-1/2 bg-red-500 px-5 py-2 rounded-full shadow-lg z-50"
         >
           ← Back
         </button>
@@ -247,12 +245,9 @@ export default function App() {
         </div>
       )}
 
-      {/* FOOTER */}
-      <footer className="mt-auto py-3 text-center text-xs text-gray-400 border-t border-white/10">
-        Made with ❤️ by{" "}
-        <span className="text-purple-400 font-semibold cursor-pointer">
-          Shiyan
-        </span>
+      {/* FOOTER (ALWAYS FIXED, NOT SCROLL ISSUE) */}
+      <footer className="fixed bottom-0 w-full bg-black/70 backdrop-blur-xl text-center py-2 text-xs text-gray-400 border-t border-white/10">
+        Made with ❤️ by <span className="text-purple-400">Shiyan</span>
       </footer>
     </div>
   );
