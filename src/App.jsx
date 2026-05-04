@@ -12,7 +12,6 @@ export default function App() {
 
   const BASE_URL = "https://drive-backend-fwgl.onrender.com";
 
-  // FETCH DATA
   const getdata = async () => {
     let url = `${BASE_URL}/api/v2/getfile`;
     if (parentid) url = `${BASE_URL}/api/v2/getfile/${parentid}`;
@@ -26,7 +25,6 @@ export default function App() {
     getdata();
   }, [parentid]);
 
-  // CREATE / UPDATE
   const addtask = async (e) => {
     e.preventDefault();
 
@@ -58,7 +56,6 @@ export default function App() {
     getdata();
   };
 
-  // DELETE
   const deletes = async (id) => {
     await fetch(`${BASE_URL}/api/v2/deletefile/${id}`, {
       method: "DELETE",
@@ -66,7 +63,6 @@ export default function App() {
     getdata();
   };
 
-  // OPEN FOLDER
   const openFolder = (item) => {
     if (item.type === "folder") {
       setparentid(item._id);
@@ -74,7 +70,6 @@ export default function App() {
     }
   };
 
-  // BACK NAVIGATION
   const goBack = () => {
     const newPath = [...path];
     newPath.pop();
@@ -101,8 +96,8 @@ export default function App() {
         <div className="absolute inset-0 bg-black/70" />
       </div>
 
-      {/* HEADER */}
-      <header className="fixed top-0 w-full z-50 bg-black/60 backdrop-blur-xl p-3 space-y-2">
+      {/* HEADER (fixed safe height) */}
+      <header className="fixed top-0 w-full z-50 bg-black/60 backdrop-blur-xl px-3 py-2 space-y-2">
         <h1 className="text-purple-400 font-bold text-lg">Shiyan Drive</h1>
 
         <input
@@ -140,8 +135,8 @@ export default function App() {
         </form>
       </header>
 
-      {/* BREADCRUMB */}
-      <div className="pt-32 px-3 text-xs flex gap-2 overflow-x-auto whitespace-nowrap">
+      {/* BREADCRUMB (proper spacing fix) */}
+      <div className="pt-[190px] md:pt-[170px] px-3 text-xs flex gap-2 overflow-x-auto whitespace-nowrap">
         <span
           onClick={() => {
             setparentid(null);
@@ -166,12 +161,12 @@ export default function App() {
         ))}
       </div>
 
-      {/* GRID */}
-      <main className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-24">
+      {/* GRID (clean mobile spacing) */}
+      <main className="p-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 pb-28">
         {filteredData.map((item) => (
           <div
             key={item._id}
-            className="bg-white/5 border border-white/10 rounded-xl p-2 hover:scale-105 transition cursor-pointer"
+            className="bg-white/5 border border-white/10 rounded-xl p-2 hover:scale-105 transition"
           >
             <div
               onClick={() => openFolder(item)}
@@ -214,11 +209,11 @@ export default function App() {
         ))}
       </main>
 
-      {/* BACK BUTTON */}
+      {/* BACK BUTTON (FIXED POSITION PROPER) */}
       {parentid && (
         <button
           onClick={goBack}
-          className="fixed bottom-5 left-1/2 -translate-x-1/2 bg-red-500 px-6 py-2 rounded-full shadow-lg md:top-20 md:bottom-auto"
+          className="fixed bottom-20 left-1/2 -translate-x-1/2 bg-red-500 px-5 py-2 rounded-full shadow-lg md:top-24 md:bottom-auto"
         >
           ← Back
         </button>
@@ -234,8 +229,8 @@ export default function App() {
         </div>
       )}
 
-      {/* FOOTER */}
-      <footer className="text-center py-3 text-xs text-gray-400 border-t border-white/10 mt-auto">
+      {/* FOOTER (fixed clean position, not too low) */}
+      <footer className="mt-auto py-4 text-center text-xs text-gray-400 border-t border-white/10">
         Made with ❤️ by <span className="text-purple-400">Shiyan</span>
       </footer>
     </div>
