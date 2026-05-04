@@ -78,6 +78,10 @@ export default function App() {
     setpath(newPath);
     setparentid(last ? last._id : null);
   };
+  const edits = (item) => {
+    setname(item.name);
+    seteditid(item._id);
+  };
 
   const isImage = (file) => /\.(jpg|jpeg|png|gif|webp)$/i.test(file);
 
@@ -197,10 +201,7 @@ export default function App() {
                 Del
               </button>
 
-              <button
-                onClick={() => seteditid(item._id)}
-                className="text-yellow-400"
-              >
+              <button onClick={() => edits(item)} className="text-yellow-400">
                 Edit
               </button>
             </div>
