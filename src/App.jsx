@@ -9,6 +9,7 @@ export default function App() {
   const [editid, seteditid] = useState(null);
   const [search, setsearch] = useState("");
   const [preview, setpreview] = useState(null);
+  const [shareLink, setShareLink] = useState(null);
 
   const BASE_URL = "https://drive-backend-fwgl.onrender.com";
 
@@ -26,10 +27,11 @@ export default function App() {
     getdata();
   }, [parentid]);
 
-  // CREATE / UPDATE
+  // CREATE + UPDATE
   const addtask = async (e) => {
     e.preventDefault();
 
+    // UPDATE MODE
     if (editid) {
       await fetch(`${BASE_URL}/api/v2/updatefile/${editid}`, {
         method: "PUT",
@@ -43,6 +45,7 @@ export default function App() {
       return;
     }
 
+    // CREATE MODE
     const formdata = new FormData();
     formdata.append("name", name);
     if (file) formdata.append("file", file);
@@ -66,7 +69,13 @@ export default function App() {
     getdata();
   };
 
-  // OPEN FOLDER + BREADCRUMB
+  // EDIT
+  const editItem = (item) => {
+    setname(item.name);
+    seteditid(item._id);
+  };
+
+  // OPEN FOLDER
   const openFolder = (item) => {
     if (item.type === "folder") {
       setparentid(item._id);
@@ -74,14 +83,20 @@ export default function App() {
     }
   };
 
-  const goBackTo = (index) => {
-    const newPath = path.slice(0, index + 1);
+  // BACK NAV
+  const goBack = () => {
+    const newPath = [...path];
+    newPath.pop();
+    const last = newPath[newPath.length - 1];
+
     setpath(newPath);
-    setparentid(newPath[index]?._id || null);
+    setparentid(last ? last._id : null);
   };
 
+  // IMAGE CHECK
   const isImage = (file) => /\.(jpg|jpeg|png|gif|webp)$/i.test(file);
 
+  // SEARCH (frontend)
   const filteredData = data.filter((item) =>
     item.name.toLowerCase().includes(search.toLowerCase()),
   );
@@ -92,11 +107,19 @@ export default function App() {
     setfile(e.dataTransfer.files[0]);
   };
 
+  const handleDragOver = (e) => e.preventDefault();
+
+  // SHARE LINK (frontend demo)
+  const generateShare = (item) => {
+    const link = `${window.location.origin}/share/${item._id}`;
+    setShareLink(link);
+  };
+
   return (
     <div
-      onDragOver={(e) => e.preventDefault()}
       onDrop={handleDrop}
-      className="bg-[#0f0c14] text-white min-h-screen"
+      onDragOver={handleDragOver}
+      className="min-h-screen bg-[#0b0a10] text-white"
     >
       {/* BACKGROUND */}
       <div className="fixed inset-0 -z-10">
@@ -104,18 +127,22 @@ export default function App() {
           src="https://images.unsplash.com/photo-1639322537228-f710d846310a?q=80&w=2070"
           className="w-full h-full object-cover opacity-20"
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/40 to-black"></div>
+        <div className="absolute inset-0 bg-gradient-to-br from-black via-purple-900/50 to-black"></div>
+
+        <h1 className="absolute text-[15vw] opacity-[0.04] top-1/3 left-1/2 -translate-x-1/2">
+          SHIYAN
+        </h1>
       </div>
 
       {/* HEADER */}
-      <header className="fixed top-0 w-full flex flex-col md:flex-row gap-3 md:gap-0 justify-between items-start md:items-center px-4 py-3 bg-black/40 backdrop-blur-xl z-50">
-        <h1 className="text-xl font-bold text-purple-400">Shiyan Drive</h1>
+      <header className="fixed top-0 w-full z-50 bg-black/50 backdrop-blur-xl px-3 md:px-6 py-3 flex flex-col md:flex-row gap-2 md:items-center">
+        <h1 className="text-purple-400 font-bold text-lg">Shiyan Drive</h1>
 
         <input
           value={search}
           onChange={(e) => setsearch(e.target.value)}
           placeholder="Search..."
-          className="w-full md:w-64 bg-white/10 px-3 py-2 rounded-lg"
+          className="flex-1 bg-white/10 px-3 py-2 rounded-lg"
         />
 
         <form onSubmit={addtask} className="flex gap-2 flex-wrap">
@@ -135,7 +162,7 @@ export default function App() {
 
           <label
             htmlFor="file"
-            className="px-3 py-2 bg-white/10 rounded-lg cursor-pointer"
+            className="bg-white/10 px-3 py-2 rounded-lg cursor-pointer"
           >
             📁
           </label>
@@ -147,45 +174,48 @@ export default function App() {
       </header>
 
       {/* BREADCRUMB */}
-      <div className="pt-24 px-4 text-sm text-gray-300 flex gap-2 flex-wrap">
-        <span
+      <div className="pt-24 px-4 flex gap-2 text-sm flex-wrap">
+        <button
           onClick={() => {
             setparentid(null);
             setpath([]);
           }}
-          className="cursor-pointer hover:text-white"
+          className="text-white"
         >
           Home /
-        </span>
+        </button>
 
         {path.map((p, i) => (
           <span
             key={i}
-            onClick={() => goBackTo(i)}
-            className="cursor-pointer hover:text-white"
+            onClick={() => {
+              setparentid(p._id);
+              setpath(path.slice(0, i + 1));
+            }}
+            className="cursor-pointer"
           >
             {p.name} /
           </span>
         ))}
       </div>
 
-      {/* MAIN */}
-      <main className="p-4 md:ml-0 grid grid-cols-2 md:grid-cols-4 gap-4">
+      {/* GRID */}
+      <main className="p-3 md:p-6 grid grid-cols-2 md:grid-cols-4 gap-4">
         {filteredData.map((item) => (
           <div
             key={item._id}
-            className="bg-white/5 p-3 rounded-xl hover:scale-105 transition cursor-pointer"
+            className="bg-white/5 p-3 rounded-xl border border-white/10"
           >
-            {/* FILE PREVIEW */}
+            {/* FILE */}
             <div
               onClick={() => openFolder(item)}
               onDoubleClick={() => item.file && setpreview(item.file)}
-              className="h-32 bg-black/30 flex items-center justify-center rounded-lg overflow-hidden"
+              className="h-28 md:h-40 bg-black/30 rounded-lg flex items-center justify-center cursor-pointer overflow-hidden"
             >
               {item.type === "folder" ? (
                 <img
                   src="https://cdn-icons-png.flaticon.com/512/3767/3767084.png"
-                  className="w-16"
+                  className="w-16 md:w-20"
                 />
               ) : item.file && isImage(item.file) ? (
                 <img src={item.file} className="w-full h-full object-cover" />
@@ -194,8 +224,9 @@ export default function App() {
               )}
             </div>
 
-            <p className="mt-2 truncate">{item.name}</p>
+            <p className="mt-2 text-sm truncate">{item.name}</p>
 
+            {/* ACTIONS */}
             <div className="flex justify-between text-xs mt-2">
               <button
                 onClick={() => deletes(item._id)}
@@ -203,18 +234,44 @@ export default function App() {
               >
                 Delete
               </button>
+
+              <button
+                onClick={() => editItem(item)}
+                className="text-yellow-400"
+              >
+                Edit
+              </button>
+
+              <button
+                onClick={() => generateShare(item)}
+                className="text-blue-400"
+              >
+                Share
+              </button>
             </div>
           </div>
         ))}
       </main>
 
-      {/* FILE PREVIEW MODAL */}
+      {/* PREVIEW */}
       {preview && (
         <div
           onClick={() => setpreview(null)}
           className="fixed inset-0 bg-black/80 flex items-center justify-center"
         >
-          <img src={preview} className="max-w-[80%] max-h-[80%] rounded-xl" />
+          <img src={preview} className="max-w-[90%] max-h-[80%] rounded-xl" />
+        </div>
+      )}
+
+      {/* SHARE MODAL */}
+      {shareLink && (
+        <div
+          onClick={() => setShareLink(null)}
+          className="fixed inset-0 bg-black/80 flex items-center justify-center"
+        >
+          <div className="bg-white/10 p-4 rounded-xl">
+            <p className="text-sm break-all">{shareLink}</p>
+          </div>
         </div>
       )}
     </div>
