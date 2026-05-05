@@ -137,6 +137,7 @@ export default function App() {
           <input
             type="file"
             id="file"
+            name="file"
             onChange={(e) => setfile(e.target.files[0])}
             className="hidden"
           />
